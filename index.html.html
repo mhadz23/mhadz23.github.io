@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Money">
+<meta name="theme-color" content="#1f6feb">
+<meta name="format-detection" content="telephone=no">
+<title>My Money</title>
+<style>
+  :root{--bg:#f4f6fb;--card:#fff;--text:#1b2233;--muted:#6b7488;--brand:#1f6feb;--green:#13a05b;--red:#d93a4a;--line:#e5e8f0}
+  @media (prefers-color-scheme:dark){:root{--bg:#0f131c;--card:#1a2030;--text:#eaeefb;--muted:#9aa4bd;--line:#2a3247}}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%;background:var(--bg)}
+  button,select,input{font-family:inherit;touch-action:manipulation}
+  button{-webkit-appearance:none;appearance:none;cursor:pointer}
+  :root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px)}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);padding-bottom:calc(90px + var(--sab));-webkit-overflow-scrolling:touch}
+  header{background:var(--brand);color:#fff;padding:calc(20px + var(--sat)) calc(16px + var(--sar)) 28px calc(16px + var(--sal))}
+  header small{opacity:.85}
+  header h1{margin:4px 0 0;font-size:30px}
+  main{padding:0 14px;margin-top:-16px;max-width:640px;margin-inline:auto}
+  .card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .acc{padding:10px 0;border-bottom:1px solid var(--line)}
+  .acc:last-child{border:0}
+  .muted{color:var(--muted);font-size:13px}
+  .pos{color:var(--green)}.neg{color:var(--red)}
+  .tx{padding:10px 0;border-bottom:1px solid var(--line)}
+  .tx:last-child{border:0}
+  nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:var(--sab);z-index:10}
+  nav button{flex:1;padding:14px 0;min-height:48px;border:0;background:none;color:var(--muted);font-size:14px}
+  nav button.on{color:var(--brand);font-weight:700}
+  .fab{position:fixed;right:calc(18px + var(--sar));bottom:calc(70px + var(--sab));z-index:11;width:56px;height:56px;border-radius:50%;border:0;background:var(--brand);color:#fff;font-size:30px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+  button.btn{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-size:15px}
+  button.btn:disabled{opacity:.6}
+  button.ghost{background:none;color:var(--brand);border:1px solid var(--brand)}
+  button.link{background:none;border:0;color:var(--red);font-size:14px;padding:10px 4px 4px;min-width:56px}
+  button.clip{background:none;border:0;color:var(--brand);font-size:22px;padding:4px 8px;flex:none;margin-left:auto}
+  #toast{display:none;position:fixed;left:14px;right:14px;bottom:calc(80px + var(--sab));background:#222;color:#fff;padding:12px 14px;border-radius:12px;z-index:99;font-size:14px;text-align:center}
+  dialog{border:0;border-radius:16px;padding:18px;width:min(92vw,420px);max-height:86vh;max-height:86dvh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:auto;background:var(--card);color:var(--text)}
+  dialog::backdrop{background:rgba(0,0,0,.5)}
+  label{display:block;margin:10px 0 4px;font-size:13px;color:var(--muted)}
+  input,select{width:100%;min-height:44px;-webkit-appearance:none;appearance:none;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:16px}
+  .seg{display:flex;gap:6px}
+  .seg button{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+  .seg button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;background:var(--brand)}
+  .filters{display:flex;gap:8px;margin-bottom:10px}
+  select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:32px}
+  input[type=date]{display:block;text-align:left;line-height:1.2}
+  input[type=file]{font-size:14px;padding:8px}
+  button.link{min-height:44px}
+  button.clip{min-width:44px;min-height:44px}
+  .who{display:flex;align-items:center;white-space:nowrap}
+  .who button{min-height:36px}
+  .empty{text-align:center;color:var(--muted);padding:20px 0}
+  #pv img{max-width:100%;max-height:160px;border-radius:10px;margin-top:8px}
+  #auth{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:calc(16px + var(--sat)) 16px calc(16px + var(--sab));overflow:auto;-webkit-overflow-scrolling:touch}
+  #auth[hidden]{display:none}
+  #auth .box{width:min(100%,380px)}
+  #auth h2{margin:0 0 4px}
+  #auth .logo{font-size:40px;text-align:center}
+  body.locked header, body.locked main, body.locked nav, body.locked .fab{display:none}
+  .who{font-size:13px;opacity:.9}
+  .who button{background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:8px;padding:6px 10px;margin-left:8px;font-size:13px}
+
+  /* ===== GLOW + SCROLL EFFECTS ===== */
+  :root{--glow:rgba(31,111,235,.55);--glow-soft:rgba(31,111,235,.22);--glow-green:rgba(19,160,91,.55);--glow-red:rgba(217,58,74,.5)}
+  @media (prefers-color-scheme:dark){:root{--glow:rgba(88,156,255,.6);--glow-soft:rgba(88,156,255,.2)}}
+
+  /* scroll progress bar */
+  #prog{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);z-index:60;pointer-events:none;
+    background:linear-gradient(90deg,#4da3ff,#9b6bff,#35e0a1);box-shadow:0 0 10px var(--glow),0 0 18px var(--glow)}
+
+  /* header: animated glowing gradient, shrinks + blurs while scrolling */
+  header{background:linear-gradient(120deg,#1f6feb,#5b5bf0,#1f9bff,#1f6feb);background-size:300% 300%;
+    animation:hdrFlow 12s ease infinite;box-shadow:0 6px 28px var(--glow-soft)}
+  @keyframes hdrFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  header h1{text-shadow:0 0 18px rgba(255,255,255,.55),0 0 36px var(--glow)}
+  /* compact balance bar that slides in while scrolling (header itself never changes size) */
+  #mini{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;justify-content:space-between;align-items:center;
+    padding:calc(8px + var(--sat)) calc(16px + var(--sar)) 10px calc(16px + var(--sal));color:#fff;font-size:15px;
+    background:linear-gradient(120deg,#1f6feb,#5b5bf0,#1f9bff);box-shadow:0 6px 24px var(--glow);
+    transform:translateY(-110%);transition:transform .3s ease;pointer-events:none}
+  #mini.show{transform:none}
+  #mini b{font-size:18px;text-shadow:0 0 14px rgba(255,255,255,.6)}
+  body.locked #mini{display:none}
+
+  /* cards: soft glow, lift on touch */
+  .card{position:relative;transition:transform .25s ease,box-shadow .25s ease;
+    box-shadow:0 1px 3px rgba(0,0,0,.08),0 0 0 1px var(--glow-soft),0 8px 24px -10px var(--glow-soft)}
+  .card:active{box-shadow:0 0 0 1px var(--glow),0 0 22px var(--glow-soft)}
+
+  /* scroll-reveal */
+  .reveal{opacity:0;transform:translateY(22px);
+    transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0ms)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* buttons glow */
+  button.btn{box-shadow:0 0 14px var(--glow-soft);transition:box-shadow .2s ease,transform .15s ease}
+  button.btn:active{transform:scale(.96);box-shadow:0 0 22px var(--glow)}
+  button.ghost{box-shadow:inset 0 0 8px var(--glow-soft),0 0 10px var(--glow-soft)}
+  .fab{transition:transform .3s ease,opacity .3s ease;
+    background:linear-gradient(135deg,#3a8dff,#1f6feb)}
+  .fab:active{transform:scale(.92)}
+  .fab.hide{transform:translateY(90px) scale(.8);opacity:0;pointer-events:none}
+  .fab::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 22px var(--glow);pointer-events:none;will-change:transform,opacity;animation:fabPulse 2.6s ease-in-out infinite}
+  @keyframes fabPulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.4);opacity:0}}
+
+  /* nav: glowing active tab, hides on scroll down */
+  nav{transition:transform .3s ease;box-shadow:0 -6px 24px -10px var(--glow-soft)}
+  nav.hide{transform:translateY(100%)}
+  nav button{position:relative;transition:color .2s ease}
+  nav button.on{text-shadow:0 0 12px var(--glow)}
+  nav button.on::after{content:"";position:absolute;left:25%;right:25%;top:0;height:3px;border-radius:0 0 4px 4px;background:var(--brand);box-shadow:0 0 12px var(--glow),0 0 22px var(--glow)}
+
+  /* money glow */
+  .pos{text-shadow:0 0 10px var(--glow-green)}
+  .neg{text-shadow:0 0 10px var(--glow-red)}
+
+  /* spending bars: glow + grow in */
+  .bar i{background:linear-gradient(90deg,#1f6feb,#6aa8ff);box-shadow:0 0 10px var(--glow);transform-origin:0 50%}
+  #view.anim .bar i{animation:barGrow .9s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+  /* inputs glow on focus */
+  input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--glow-soft),0 0 16px var(--glow-soft)}
+  .seg button.on{box-shadow:0 0 14px var(--glow)}
+
+  /* dialog + login pop-in with glow */
+  dialog[open]{animation:dlgIn .3s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 0 1px var(--glow-soft),0 0 40px var(--glow-soft),0 20px 50px rgba(0,0,0,.35)}
+  dialog[open]::backdrop{animation:fadeIn .3s ease;}
+  @keyframes dlgIn{from{opacity:0;transform:translateY(24px) scale(.95)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  #auth .box{animation:dlgIn .5s cubic-bezier(.2,.8,.2,1)}
+  #auth .logo{filter:drop-shadow(0 0 14px var(--glow));animation:float 3s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  #auth{background:radial-gradient(circle at 50% 20%,var(--glow-soft),transparent 60%),var(--bg)}
+
+  /* ===== PINK THEME (partner / non-admin users) ===== */
+  html.pink{--bg:#fff0f7;--card:#ffffff;--text:#4a1f37;--muted:#9a6a82;--brand:#ec2f94;--line:#fbd5e7;--glow:rgba(236,47,148,.55);--glow-soft:rgba(236,47,148,.2)}
+  @media (prefers-color-scheme:dark){html.pink{--bg:#1d0f18;--card:#2b1623;--text:#ffeaf5;--muted:#dba8c3;--line:#4d2842;--glow:rgba(255,105,180,.6);--glow-soft:rgba(255,105,180,.22)}}
+  html.pink header{background:linear-gradient(120deg,#e8267f,#f0449d,#c93bd6,#e8267f);background-size:300% 300%;position:relative;overflow:hidden}
+  html.pink header::before,html.pink header::after{content:"";position:absolute;border-radius:50%;pointer-events:none}
+  html.pink header::before{width:160px;height:160px;right:-50px;bottom:-80px;background:radial-gradient(circle,rgba(255,255,255,.28),transparent 70%)}
+  html.pink header::after{width:120px;height:120px;left:30%;bottom:-70px;background:radial-gradient(circle,rgba(255,190,225,.3),transparent 70%)}
+  html.pink header>*{position:relative;z-index:1}
+  html.pink header small,html.pink header #cloudStatus{opacity:1;text-shadow:0 1px 2px rgba(120,0,60,.35)}
+  html.pink .who{opacity:1;text-shadow:0 1px 2px rgba(120,0,60,.35)}
+  html.pink .who button{background:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.35);text-shadow:none}
+  html.pink .filters{position:relative}
+  html.pink .pos{text-shadow:none}
+  html.pink .neg{text-shadow:none}
+  html.pink header h1::after{content:" ✨";font-size:22px}
+  html.pink #mini{background:linear-gradient(120deg,#e8267f,#f0449d,#c93bd6)}
+  html.pink #prog{background:linear-gradient(90deg,#ff9ccd,#ec2f94,#c13cff)}
+  html.pink .fab{background:linear-gradient(135deg,#ff6bb5,#ec2f94)}
+  html.pink .bar i{background:linear-gradient(90deg,#ec2f94,#ff9ccd)}
+  html.pink .card{box-shadow:0 1px 3px rgba(0,0,0,.06),0 0 0 1px var(--glow-soft),0 8px 26px -8px var(--glow-soft);border-radius:20px}
+  html.pink button.btn,html.pink .seg button,html.pink input,html.pink select,html.pink dialog{border-radius:14px}
+  html.pink dialog{border-radius:22px}
+  html.pink nav{border-radius:22px 22px 0 0}
+  html.pink #auth{background:radial-gradient(circle at 50% 20%,var(--glow-soft),transparent 60%),var(--bg)}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body class="locked">
+<div id="prog"></div>
+<div id="mini"><span>💰 My Money</span><b id="miniTotal"></b></div>
+<div id="auth" hidden></div>
+<header>
+  <div class="row"><small>Total balance</small><span class="who" id="who"></span></div>
+  <h1 id="total">0.00</h1><div id="cloudStatus" style="font-size:12px;opacity:.9;margin-top:3px"></div>
+</header>
+<main id="view"></main>
+
+<button class="fab" id="fab" aria-label="Add transaction">+</button>
+<nav>
+  <button data-tab="home" class="on">Accounts</button>
+  <button data-tab="history">History</button>
+  <button data-tab="summary">Summary</button>
+</nav>
+
+<dialog id="dlg"></dialog>
+
+<script>
+/* Google Sheets is the database. This page keeps no data and no passwords of its own:
+   logins and roles are checked by the Apps Script, and the page only holds a session token. */
+const API = "https://script.google.com/macros/s/AKfycby1qWn2yFf7RJHFwkNPuJ81Uwp5R-sZQo8UizUb0yRACf0ziwBwTvsfb-YL8vCIropYpQ/exec";
+const TOKEN_KEY = 'mymoney.token';
+const CATS_OUT = ['Food','Transport','Bills','Shopping','Health','Fun','Other'];
+const CATS_IN = ['Salary','Allowance','Gift','Refund','Other'];
+const IMG_RE = /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/;
+const USER_RE = /^[A-Za-z0-9._-]{3,20}$/;
+const USER_MSG = 'Username: 3 to 20 letters, numbers, . _ or -';
+const dlg = document.getElementById('dlg');
+const authEl = document.getElementById('auth');
+
+let token = null;
+try { token = localStorage.getItem(TOKEN_KEY); } catch(e){}
+let role = null, user = '', deletedCount = 0;
+let db = { currency:'₱', accounts:[], tx:[] };
+let tab = 'home', filterAcc = 'all', filterMonth = thisMonth(), sumMonth = thisMonth();
+const imgCache = {};
+let syncing = false, saving = false, authBusy = false;
+let rev = 0;        // bumps on every local change, so a slow sync reply can never overwrite newer data
+let lastSync = 0, histLimit = 100, balCache = null;
+
+/* ---------- talking to Google Sheets ---------- */
+async function api(action, data){
+  // Hard timeout so a stalled request can never leave the app stuck on "Saving..." or "Syncing...".
+  const ctl = new AbortController();
+  const ms = (action==='putImage' || action==='getImage') ? 60000 : 30000;
+  const timer = setTimeout(()=>ctl.abort(), ms);
+  let out;
+  try {
+    const r = await fetch(API, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ ...(data||{}), action, token }), signal: ctl.signal });
+    out = await r.json();
+  } catch(e){
+    if (ctl.signal.aborted) return { ok:false, timeout:true, error:'Google Sheets is taking too long. If you were saving, check History before trying again.' };
+    if (e instanceof SyntaxError) return { ok:false, error:'Google Sheets sent an unexpected reply.' };
+    return { ok:false, error:'No connection. Check your internet and try again.' };
+  } finally { clearTimeout(timer); }
+  if (!out || typeof out !== 'object') return { ok:false, error:'Empty reply.' };
+  if (out.error === 'auth' && action !== 'login' && action !== 'setup'){
+    endSession();
+    return { ok:false, auth:true, error:'Please log in again.' };
+  }
+  return out;
+}
+function setStatus(t){ const s = document.getElementById('cloudStatus'); if (s) s.textContent = t; }
+
+/* ---------- small helpers ---------- */
+function cleanCur(s){ return String(s||'').replace(/[<>&"'`\\]/g,'').trim().slice(0,4) || '₱'; }
+function cleanId(s){ return String(s??'').replace(/[^a-z0-9]/gi,'').slice(0,40); }
+// Rebuilds data from known fields only, so a bad reply cannot break the page.
+function sanitizeDb(d){
+  const accounts = [], seenA = new Set();
+  for (const a of (Array.isArray(d.accounts)?d.accounts:[])){
+    const id = cleanId(a && a.id), name = String(a && a.name || '').slice(0,60).trim();
+    if (!id || !name || seenA.has(id)) continue;
+    seenA.add(id);
+    const op = Number(a.opening);
+    accounts.push({ id, name, type:String(a.type||'Cash').slice(0,20), opening:Number.isFinite(op) ? Math.round(op*100)/100 : 0 });
+  }
+  const tx = [], seenT = new Set();
+  for (const t of (Array.isArray(d.tx)?d.tx:[])){
+    if (!t) continue;
+    const type = ['income','expense','transfer'].includes(t.type) ? t.type : null;
+    const amount = Math.round(Number(t.amount)*100)/100;
+    const id = cleanId(t.id), accountId = cleanId(t.accountId), toId = cleanId(t.toId);
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(String(t.date)) ? String(t.date) : null;
+    if (!type || !Number.isFinite(amount) || !(amount>0) || !id || !date || seenT.has(id) || !seenA.has(accountId)) continue;
+    if (type==='transfer' && (!seenA.has(toId) || toId===accountId)) continue;
+    seenT.add(id);
+    const o = { id, type, amount, accountId, date, note:String(t.note??'').slice(0,200) };
+    if (type==='transfer') o.toId = toId; else o.category = String(t.category||'Other').slice(0,30);
+    if (t.img) o.img = true;
+    tx.push(o);
+  }
+  return { currency:cleanCur(d.currency), accounts, tx };
+}
+function toast(msg){
+  let t = document.getElementById('toast');
+  if (!t){ t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.style.display='none', 4500);
+}
+function ask(msg, yesLabel, fn){
+  window._yes = fn;
+  dlg.innerHTML = `<p>${esc(msg)}</p><div class="row" style="margin-top:16px">
+    <button class="btn ghost" onclick="closeDlg()">Cancel</button>
+    <button class="btn" style="background:var(--red)" onclick="closeDlg();window._yes&&window._yes()">${esc(yesLabel)}</button></div>`;
+  dlg.showModal();
+}
+function thisMonth(){ return today().slice(0,7); } // local time (UTC would show last month early on the 1st in Manila)
+function today(){ const d = new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function money(n){ return (n<0?'-':'')+db.currency+Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function acc(id){ return db.accounts.find(a=>a.id===id); }
+function isAdmin(){ return role==='admin'; }
+function closeDlg(){ dlg.close(); }
+
+/* ---------- screenshots ---------- */
+function compress(file){
+  return new Promise((res,rej)=>{
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = ()=>{
+      try {
+        const w = im.width, h = im.height;
+        let k = Math.min(1, 1600/Math.max(w,h));      // normal photos: longest side 1600px
+        k = Math.max(k, Math.min(1, 1000/w));         // tall screenshots: keep at least 1000px wide so text stays readable
+        k = Math.min(k, Math.sqrt(8e6/(w*h)));        // cap size so phones do not run out of memory
+        const c = document.createElement('canvas'); c.width = Math.max(1,Math.round(w*k)); c.height = Math.max(1,Math.round(h*k));
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(im,0,0,c.width,c.height);
+        let q = 0.75, out = c.toDataURL('image/jpeg', q);
+        while (out.length > 2900000 && q > 0.3){ q -= 0.15; out = c.toDataURL('image/jpeg', q); } // server limit is 3 MB
+        res(out);
+      } catch(e){ rej(e); }
+      URL.revokeObjectURL(url);
+    };
+    im.onerror = ()=>{ URL.revokeObjectURL(url); rej(); }; im.src = url;
+  });
+}
+function mkImg(d, style){
+  const im = document.createElement('img'); im.alt = 'screenshot';
+  if (style) im.style.cssText = style;
+  im.src = d; return im;
+}
+async function viewImg(id){
+  dlg.innerHTML = '<div id="big" class="muted" style="text-align:center;padding:30px 0">Loading…</div><div class="row" style="margin-top:12px"><button class="btn ghost" onclick="closeDlg()">Close</button></div>';
+  dlg.showModal();
+  let d = imgCache[id];
+  if (!d){
+    const r = await api('getImage', { id });
+    if (r.ok && typeof r.data==='string' && IMG_RE.test(r.data)) d = imgCache[id] = r.data;
+  }
+  const big = document.getElementById('big'); if (!big) return;
+  if (!d){ big.textContent = 'Could not load the screenshot.'; return; }
+  big.className = ''; big.style.cssText = '';
+  big.replaceChildren(mkImg(d, 'width:100%;border-radius:10px'));
+}
+
+/* ---------- views ---------- */
+function balances(){
+  if (balCache) return balCache;
+  const m = {};
+  for (const a of db.accounts) m[a.id] = a.opening;
+  for (const t of db.tx){
+    if (t.type==='income' && t.accountId in m) m[t.accountId] += t.amount;
+    else if (t.type==='expense' && t.accountId in m) m[t.accountId] -= t.amount;
+    else if (t.type==='transfer'){ if (t.accountId in m) m[t.accountId] -= t.amount; if (t.toId in m) m[t.toId] += t.amount; }
+  }
+  for (const k in m) m[k] = Math.round(m[k]*100)/100;
+  return balCache = m;
+}
+function balance(a){ return balances()[a.id] || 0; }
+
+function render(){
+  balCache = null;
+  const total = db.accounts.reduce((s,a)=>s+balance(a),0);
+  const totalTxt = money(Math.round(total*100)/100);
+  document.getElementById('total').textContent = totalTxt;
+  document.getElementById('miniTotal').textContent = totalTxt;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  const v = document.getElementById('view');
+  v.innerHTML = tab==='home' ? viewHome() : tab==='history' ? viewHistory() : viewSummary();
+  // animate only when switching tabs (not on every sync, filter change or save)
+  const animate = lastTab !== tab; lastTab = tab;
+  v.classList.toggle('anim', animate);
+  if (revealIO) revealIO.disconnect();
+  if (animate){ setupReveal(v); window.scrollTo(0,0); }
+  if (role) scheduleSave();
+}
+let lastTab = null;
+
+/* ---------- scroll effects ---------- */
+let revealIO = null;
+function setupReveal(root){
+  const items = root.querySelectorAll('.card, .filters');
+  if (!('IntersectionObserver' in window)){ items.forEach(el=>el.classList.add('in')); return; }
+  if (revealIO) revealIO.disconnect();
+  revealIO = new IntersectionObserver(es=>{
+    es.forEach(e=>{ if (e.isIntersecting){ e.target.classList.add('in'); revealIO.unobserve(e.target); } });
+  }, { threshold:0.08, rootMargin:'0px 0px -6% 0px' });
+  items.forEach((el,i)=>{ el.classList.add('reveal'); el.style.setProperty('--d', Math.min(i,5)*70+'ms'); revealIO.observe(el); });
+  // safety net: anything already on screen must never stay invisible
+  setTimeout(()=>items.forEach(el=>{ if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('in'); }), 900);
+}
+(function(){
+  const prog = document.getElementById('prog'), mini = document.getElementById('mini'),
+        nav = document.querySelector('nav'), fab = document.getElementById('fab');
+  let lastY = window.scrollY, ticking = false, maxY = 0;
+  function measure(){ maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight); }
+  function onScroll(){
+    const y = Math.min(maxY, Math.max(0, window.scrollY));   // clamp: iPhone bounce scrolling overshoots both ends
+    prog.style.transform = 'scaleX(' + (maxY > 0 ? y/maxY : 0) + ')';
+    mini.classList.toggle('show', y > 150);
+    const down = y > lastY + 6, up = y < lastY - 6;
+    if (y > 120 && down){ nav.classList.add('hide'); fab.classList.add('hide'); }
+    else if (up || y <= 120){ nav.classList.remove('hide'); fab.classList.remove('hide'); }
+    if (down || up) lastY = y;
+    ticking = false;
+  }
+  window.addEventListener('scroll', ()=>{ if (!ticking){ ticking = true; requestAnimationFrame(onScroll); } }, { passive:true });
+  window.addEventListener('resize', ()=>{ measure(); onScroll(); });
+  if ('ResizeObserver' in window) new ResizeObserver(()=>{ measure(); onScroll(); }).observe(document.body);
+  else setInterval(measure, 1000);
+  measure();
+})();
+
+function viewHome(){
+  let h = '<div class="card"><div class="row"><b>My accounts</b>' + (isAdmin() ? '<button class="btn ghost" onclick="accountDialog()">+ Account</button>' : '') + '</div>';
+  if (!db.accounts.length) h += '<div class="empty">' + (isAdmin() ? 'Add your first account (cash, bank, e-wallet) to begin.' : 'No accounts yet. The admin needs to add one.') + '</div>';
+  for (const a of db.accounts){
+    const b = balance(a);
+    h += `<div class="acc row"><div><div>${esc(a.name)}</div><div class="muted">${esc(a.type)}</div></div>
+      <div style="text-align:right"><b class="${b<0?'neg':''}">${money(b)}</b>
+      ${isAdmin()?`<br><button class="link" onclick="deleteAccount('${a.id}')">delete</button>`:''}</div></div>`;
+  }
+  h += '</div>';
+  const recent = [...db.tx].sort(byDate).slice(0,5);
+  h += '<div class="card"><b>Recent</b>' + (recent.length ? recent.map(txRow).join('') : '<div class="empty">No transactions yet.</div>') + '</div>';
+  if (isAdmin() && deletedCount > 0) h += `<div class="card"><div class="row"><span>🗑 <b>${deletedCount}</b> deleted item${deletedCount===1?'':'s'}</span><button class="btn ghost" onclick="deletedDialog()">Review</button></div></div>`;
+  if (isAdmin()) h += `<div class="card"><b>Admin tools</b><p class="muted">Your data lives in your Google Sheet. Use Export for an extra copy.</p>
+    <div class="row" style="flex-wrap:wrap"><button class="btn ghost" onclick="exportData()">Export</button>
+    <button class="btn ghost" onclick="currencyDialog()">Currency</button>
+    <button class="btn ghost" onclick="deletedDialog()">Deleted${deletedCount?' ('+deletedCount+')':''}</button>
+    <button class="btn ghost" onclick="passwordsDialog()">Logins</button></div></div>`;
+  return h;
+}
+
+function byDate(a,b){ return b.date.localeCompare(a.date) || b.id.localeCompare(a.id); }
+
+function txRow(t){
+  const a = acc(t.accountId), to = acc(t.toId);
+  let title = t.type==='transfer' ? `${esc(a?.name)} → ${esc(to?.name)}` : esc(t.category);
+  const sign = t.type==='income' ? '+' : t.type==='expense' ? '-' : '';
+  const cls = t.type==='income' ? 'pos' : t.type==='expense' ? 'neg' : '';
+  return `<div class="tx row"><div><div>${title}</div>
+    <div class="muted">${t.date}${t.type!=='transfer'?' · '+esc(a?.name):''}${t.note?' · '+esc(t.note):''}</div></div>
+    ${t.img?`<button class="clip" onclick="viewImg('${t.id}')" aria-label="View screenshot">📎</button>`:''}
+    <div style="text-align:right"><b class="${cls}">${sign}${money(t.amount)}</b>
+    ${isAdmin()?`<br><button class="link" onclick="deleteTx('${t.id}')">delete</button>`:''}</div></div>`;
+}
+
+function viewHistory(){
+  const months = [...new Set(db.tx.map(t=>t.date.slice(0,7)).concat(thisMonth()))].sort().reverse();
+  if (filterMonth!=='all' && !months.includes(filterMonth)) filterMonth = thisMonth();
+  if (filterAcc!=='all' && !acc(filterAcc)) filterAcc = 'all';
+  let list = db.tx.filter(t=>(filterMonth==='all'||t.date.startsWith(filterMonth)) &&
+    (filterAcc==='all'||t.accountId===filterAcc||t.toId===filterAcc)).sort(byDate);
+  let h = `<div class="filters">
+    <select onchange="filterMonth=this.value;histLimit=100;render()"><option value="all">All time</option>${months.map(m=>`<option ${m===filterMonth?'selected':''}>${m}</option>`).join('')}</select>
+    <select onchange="filterAcc=this.value;histLimit=100;render()"><option value="all">All accounts</option>${db.accounts.map(a=>`<option value="${a.id}" ${a.id===filterAcc?'selected':''}>${esc(a.name)}</option>`).join('')}</select></div>`;
+  h += '<div class="card">' + (list.length ? list.slice(0, histLimit).map(txRow).join('') : '<div class="empty">Nothing here.</div>');
+  if (list.length > histLimit) h += `<button class="btn ghost" style="width:100%;margin-top:12px" onclick="histLimit+=100;render()">Show more (${list.length-histLimit} left)</button>`;
+  h += '</div>';
+  return h;
+}
+
+function viewSummary(){
+  { const ms = new Set(db.tx.map(t=>t.date.slice(0,7)).concat(thisMonth())); if (!ms.has(sumMonth)) sumMonth = thisMonth(); }
+  const list = db.tx.filter(t=>t.date.startsWith(sumMonth));
+  const inc = list.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const exp = list.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const by = {};
+  list.filter(t=>t.type==='expense').forEach(t=>by[t.category]=(by[t.category]||0)+t.amount);
+  const rows = Object.entries(by).sort((a,b)=>b[1]-a[1]);
+  const months = [...new Set(db.tx.map(t=>t.date.slice(0,7)).concat(thisMonth()))].sort().reverse();
+  let h = `<div class="card"><select onchange="sumMonth=this.value;render()">${months.map(m=>`<option ${m===sumMonth?'selected':''}>${m}</option>`).join('')}</select>
+    <div class="row" style="margin-top:12px"><div><div class="muted">Income</div><b class="pos">${money(inc)}</b></div>
+    <div><div class="muted">Spent</div><b class="neg">${money(exp)}</b></div>
+    <div><div class="muted">Net</div><b class="${inc-exp<0?'neg':''}">${money(inc-exp)}</b></div></div></div>`;
+  h += '<div class="card"><b>Spending by category</b>' + (rows.length ? rows.map(([c,v])=>
+    `<div style="margin-top:12px"><div class="row"><span>${esc(c)}</span><span>${money(v)}</span></div><div class="bar"><i style="width:${(v/exp*100).toFixed(0)}%"></i></div></div>`).join('') : '<div class="empty">No spending this month.</div>') + '</div>';
+  return h;
+}
+
+/* ---------- accounts and transactions ---------- */
+function accountDialog(){
+  if (!isAdmin()) return toast('Only the admin can add accounts.');
+  dlg.innerHTML = `<h3>New account</h3>
+    <label>Name</label><input id="an" placeholder="e.g. BDO, GCash, Wallet">
+    <label>Type</label><select id="at"><option>Cash</option><option>Bank</option><option>E-wallet</option><option>Savings</option></select>
+    <label>Starting balance</label><input id="ao" type="number" step="0.01" value="0" inputmode="decimal">
+    <div class="row" style="margin-top:16px"><button class="btn ghost" onclick="closeDlg()">Cancel</button><button class="btn" id="sv" onclick="saveAccount()">Save</button></div>`;
+  dlg.showModal();
+}
+async function saveAccount(){
+  if (!isAdmin() || saving) return;
+  const name = document.getElementById('an').value.trim();
+  if (!name) return toast('Enter an account name.');
+  const ob = parseFloat(document.getElementById('ao').value) || 0;
+  if (!Number.isFinite(ob) || Math.abs(ob) >= 1e12) return toast('Enter a valid starting balance.');
+  const a = { id:uid(), name:name.slice(0,60), type:document.getElementById('at').value, opening:Math.round(ob*100)/100 };
+  saving = true; rev++; busyBtn(true);
+  const r = await api('addAccount', { account:a });
+  saving = false;
+  if (!r.ok){ busyBtn(false); return toast(r.error || 'Could not save.'); }
+  db.accounts.push(a); closeDlg(); render();
+}
+function deleteAccount(id){
+  if (!isAdmin()) return toast('Only the admin can delete.');
+  ask('Delete this account and all its transactions? Transfers to or from it are removed too, so other balances will change. You can restore it later from Deleted.', 'Delete', async ()=>{
+    if (saving) return toast('Please wait a moment.');
+    saving = true; rev++;
+    const r = await api('deleteAccount', { id });
+    saving = false;
+    if (!r.ok) return toast(r.error || 'Could not delete.');
+    if (r.deletedCount != null) deletedCount = r.deletedCount;
+    db.accounts = db.accounts.filter(a=>a.id!==id);
+    db.tx = db.tx.filter(t=>t.accountId!==id && t.toId!==id);
+    if (filterAcc===id) filterAcc = 'all';
+    render();
+  });
+}
+function deleteTx(id){
+  if (!isAdmin()) return toast('Only the admin can delete.');
+  ask('Delete this transaction? You can restore it later from Deleted.', 'Delete', async ()=>{
+    if (saving) return toast('Please wait a moment.');
+    saving = true; rev++;
+    const r = await api('deleteTx', { id });
+    saving = false;
+    if (!r.ok) return toast(r.error || 'Could not delete.');
+    if (r.deletedCount != null) deletedCount = r.deletedCount;
+    db.tx = db.tx.filter(t=>t.id!==id); render();
+  });
+}
+function busyBtn(on){ const b = document.getElementById('sv'); if (b){ b.disabled = on; b.textContent = on ? 'Saving…' : 'Save'; } }
+
+let txType = 'income', pendingImg = null;
+function txDialog(){
+  if (!db.accounts.length){ if (isAdmin()) accountDialog(); else toast('The admin needs to add an account first.'); return; }
+  txType = 'income';
+  dlg.innerHTML = `<h3>Add transaction</h3>
+    <div class="seg" id="seg">
+      <button data-t="income" class="on">Money in</button><button data-t="expense">Money out</button></div>
+    <label>Amount</label><input id="tm" type="number" step="0.01" inputmode="decimal" placeholder="0.00">
+    <label>Account</label><select id="ta">${db.accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select>
+    <div id="catBox"><label>Category</label><select id="tc">${CATS_IN.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <label>Date</label><input id="td" type="date" value="${today()}">
+    <label>Note (optional)</label><input id="tn" placeholder="e.g. lunch">
+    <label>Screenshot (optional)</label><input id="ti" type="file" accept="image/*">
+    <div id="pv"></div>
+    <div class="row" style="margin-top:16px"><button class="btn ghost" onclick="closeDlg()">Cancel</button><button class="btn" id="sv" onclick="saveTx()">Save</button></div>`;
+  document.getElementById('ti').onchange = async e=>{
+    const f = e.target.files[0], pv = document.getElementById('pv');
+    pendingImg = null; pv.innerHTML = '';
+    if (!f) return;
+    try { pendingImg = await compress(f); pv.innerHTML = `<img src="${pendingImg}" alt="preview">`; }
+    catch(err){ toast('Could not read that image.'); }
+  };
+  pendingImg = null;
+  dlg.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{
+    txType = b.dataset.t;
+    dlg.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));
+    document.getElementById('tc').innerHTML = (txType==='income'?CATS_IN:CATS_OUT).map(c=>`<option>${c}</option>`).join('');
+  });
+  dlg.showModal();
+}
+async function saveTx(){
+  if (saving) return;
+  const amount = Math.round(parseFloat(document.getElementById('tm').value)*100)/100;
+  if (!Number.isFinite(amount) || amount <= 0) return toast('Enter an amount above zero.');
+  if (amount >= 1e12) return toast('That amount is too large.');
+  const t = { id:uid(), type:txType, amount, accountId:document.getElementById('ta').value,
+    date:document.getElementById('td').value||today(), note:document.getElementById('tn').value.trim().slice(0,200),
+    category:document.getElementById('tc').value };
+  saving = true; rev++; busyBtn(true);
+  const r = await api('addTx', { tx:t });
+  if (!r.ok){ saving = false; busyBtn(false); return toast(r.error || 'Could not save to Google Sheets.'); }
+  if (pendingImg){
+    const ri = await api('putImage', { id:t.id, data:pendingImg });
+    if (ri.ok){ t.img = true; imgCache[t.id] = pendingImg; }
+    else toast('Saved, but the screenshot could not be uploaded: ' + (ri.error || 'unknown error'));
+  }
+  pendingImg = null; saving = false;
+  db.tx.push(t);
+  if (filterMonth!=='all' && !t.date.startsWith(filterMonth)) filterMonth = 'all';
+  closeDlg(); render();
+}
+
+function currencyDialog(){
+  if (!isAdmin()) return;
+  dlg.innerHTML = `<h3>Currency symbol</h3><input id="cs" value="${esc(db.currency)}" maxlength="4">
+    <div class="row" style="margin-top:16px"><button class="btn ghost" onclick="closeDlg()">Cancel</button>
+    <button class="btn" id="sv" onclick="saveCurrency()">Save</button></div>`;
+  dlg.showModal();
+}
+async function saveCurrency(){
+  if (saving) return;
+  const c = cleanCur(document.getElementById('cs').value);
+  saving = true; rev++; busyBtn(true);
+  const r = await api('setCurrency', { currency:c });
+  saving = false;
+  if (!r.ok){ busyBtn(false); return toast(r.error || 'Could not save.'); }
+  db.currency = cleanCur(r.currency || c); closeDlg(); render();
+}
+
+async function exportData(){
+  if (!isAdmin()) return;
+  const blob = new Blob([JSON.stringify(db, null, 1)],{type:'application/json'});
+  const fname = 'my-money-backup-'+today()+'.json';
+  try {
+    const f = new File([blob], fname, {type:'application/json'});
+    if (navigator.canShare && navigator.canShare({files:[f]})){
+      await navigator.share({files:[f], title:'My Money backup'});
+      return toast('Backup ready. Choose Save to Files.');
+    }
+  } catch(e){ if (e && e.name==='AbortError') return; }
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = fname;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 10000);
+  toast('Backup saved to your downloads (screenshots stay in Google Drive).');
+}
+
+/* ---------- sync ---------- */
+async function refresh(manual){
+  if (syncing || saving || !role) return;
+  if (dlg.open && !manual) return;
+  syncing = true; setStatus('Syncing…');
+  const my = rev;
+  const r = await api('load');
+  syncing = false;
+  if (!role) return;                                    // logged out while waiting
+  if (my !== rev || saving){                            // something changed while loading: this reply may be stale
+    if (!saving) setTimeout(()=>refresh(false), 400);
+    return;
+  }
+  if (r.ok){
+    lastSync = Date.now();
+    db = sanitizeDb(r); role = r.role; user = r.user; partnerUser = r.partnerUser || ''; deletedCount = r.deletedCount || 0; setWho();
+    setStatus('☁ Google Sheets connected'); render();
+    if (manual) toast('Updated.');
+  } else if (!r.auth){
+    setStatus('⚠ Could not reach Google Sheets');
+    if (manual) toast(r.error);
+  }
+}
+document.addEventListener('visibilitychange', ()=>{ if (!document.hidden && Date.now() - lastSync > 20000) refresh(false); });
+
+/* ---------- login ---------- */
+function showAuth(inner){
+  document.body.classList.add('locked');
+  authEl.hidden = false;
+  authEl.innerHTML = `<div class="box"><div class="logo">💰</div><div class="card">${inner}</div></div>`;
+}
+// Admin keeps the blue design; every other user (the Partner) gets the pink one.
+function applyTheme(){
+  const pink = !!role && role !== 'admin';
+  document.documentElement.classList.toggle('pink', pink);
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', pink ? '#ec2f94' : '#1f6feb');
+}
+function setWho(){
+  applyTheme();
+  document.getElementById('who').innerHTML = esc(user) + ' (' + role + ')<button onclick="refresh(true)" aria-label="Refresh">↻</button><button onclick="logout()">Log out</button>';
+}
+function showSetup(){
+  showAuth(`<h2>Create the admin login</h2>
+    <p class="muted">First time only. The admin has full control and can create the Partner login later. It is saved in your Google Sheet.</p>
+    <form onsubmit="return doSetup(event)">
+      <label>Admin username</label><input id="a0" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="e.g. jerome">
+      <label>Admin password</label><input id="a1" type="password" autocomplete="new-password">
+      <label>Repeat admin password</label><input id="a2" type="password" autocomplete="new-password">
+      <button class="btn" id="ab" style="width:100%;margin-top:16px">Create admin login</button></form>`);
+}
+function authBtn(on, label){ const b = document.getElementById('ab'); if (b){ b.disabled = on; if (label) b.textContent = on ? 'Please wait…' : label; } }
+async function doSetup(e){
+  e.preventDefault();
+  if (authBusy) return false;
+  const v = id => document.getElementById(id).value;
+  const u = v('a0').trim();
+  if (!USER_RE.test(u)) { toast(USER_MSG); return false; }
+  if (v('a1').length<6) { toast('Password needs at least 6 characters.'); return false; }
+  if (v('a1')!==v('a2')) { toast('Passwords do not match.'); return false; }
+  authBusy = true; authBtn(true, 'Create admin login');
+  const r = await api('setup', { user:u, pass:v('a1') });
+  authBusy = false; authBtn(false, 'Create admin login');
+  if (!r.ok){ toast(r.error || 'Setup failed.'); return false; }
+  await startSession(r);
+  return false;
+}
+function showLogin(){
+  showAuth(`<h2>Welcome back</h2><p class="muted">Log in with your username and password.</p>
+    <form onsubmit="return doLogin(event)">
+      <label>Username</label><input id="lu" autocomplete="username" autocapitalize="none" spellcheck="false">
+      <label>Password</label><input id="lp" type="password" autocomplete="current-password">
+      <button class="btn" id="ab" style="width:100%;margin-top:16px">Log in</button></form>`);
+}
+async function doLogin(e){
+  e.preventDefault();
+  if (authBusy) return false;
+  const u = document.getElementById('lu').value, p = document.getElementById('lp').value;
+  authBusy = true; authBtn(true, 'Log in');
+  const r = await api('login', { user:u, pass:p });
+  authBusy = false; authBtn(false, 'Log in');
+  if (!r.ok){ toast(r.error || 'Login failed.'); return false; }
+  await startSession(r);
+  return false;
+}
+async function startSession(r){
+  token = r.token;
+  try { localStorage.setItem(TOKEN_KEY, token); } catch(e){ toast('This browser cannot keep you logged in.'); }
+  const res = await enter();
+  if (!res.ok && !res.auth){ showAuth(`<h2>Can't load data</h2><p class="muted">${esc(res.error)}</p><button class="btn" style="width:100%" onclick="boot()">Try again</button>`); }
+}
+/* Last good copy of the data, so the app opens instantly and then updates quietly.
+   It is tied to the login token and wiped on log out. */
+const CACHE_KEY = 'mymoney.cache';
+let saveT = null;
+function saveCache(){
+  if (!role || !token) return;
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ token, role, user, partnerUser, deletedCount, db })); } catch(e){}
+}
+function scheduleSave(){ clearTimeout(saveT); saveT = setTimeout(saveCache, 400); }
+function readCache(){
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    return c && c.token === token && c.db && typeof c.role === 'string' ? c : null;
+  } catch(e){ return null; }
+}
+function clearCache(){ clearTimeout(saveT); try { localStorage.removeItem(CACHE_KEY); } catch(e){} }
+
+function showApp(status){
+  filterAcc = 'all'; filterMonth = thisMonth(); sumMonth = thisMonth(); histLimit = 100;
+  document.body.classList.remove('locked');
+  authEl.hidden = true; authEl.innerHTML = '';
+  setWho(); setStatus(status);
+  tab = 'home'; render();
+}
+async function enter(){
+  const r = await api('load');
+  if (!r.ok) return r;
+  db = sanitizeDb(r); role = r.role; user = r.user; partnerUser = r.partnerUser || ''; deletedCount = r.deletedCount || 0;
+  lastSync = Date.now();
+  showApp('☁ Google Sheets connected');
+  return r;
+}
+function endSession(){
+  token = null; role = null; user = ''; deletedCount = 0; lastTab = null; applyTheme(); clearCache();
+  try { localStorage.removeItem(TOKEN_KEY); } catch(e){}
+  db = { currency:db.currency, accounts:[], tx:[] };
+  if (dlg.open) dlg.close();
+  document.getElementById('view').innerHTML = '';
+  showLogin();
+}
+async function logout(){
+  const t = token;
+  if (t) await api('logout');
+  endSession();
+}
+
+/* ---------- manage logins (admin) ---------- */
+let partnerUser = '';
+function passwordsDialog(){
+  if (!isAdmin()) return;
+  const has = !!partnerUser;
+  dlg.innerHTML = `<h3>Manage logins</h3>
+    <p class="muted">Only the admin can create or change these. Saving logs everyone else out.</p>
+    <label>Admin username</label><input id="u1" value="${esc(user)}" autocapitalize="none" spellcheck="false">
+    <label>New admin password <span class="muted">(leave empty to keep)</span></label>
+    <input id="n1" type="password" autocomplete="new-password">
+    <label>Partner username <span class="muted">${has?'(leave as is to keep)':'(fill in to create the partner login)'}</span></label>
+    <input id="u2" value="${esc(partnerUser)}" placeholder="e.g. partner" autocapitalize="none" spellcheck="false">
+    <label>Partner password <span class="muted">${has?'(leave empty to keep)':'(required)'}</span></label>
+    <input id="n2" type="password" autocomplete="new-password">
+    <div class="row" style="margin-top:16px"><button class="btn ghost" onclick="closeDlg()">Cancel</button><button class="btn" id="sv" onclick="savePasswords()">Save</button></div>
+    ${has?'<div style="margin-top:12px;text-align:center"><button class="link" onclick="removePartner()">Remove partner login</button></div>':''}`;
+  dlg.showModal();
+}
+async function savePasswords(){
+  if (!isAdmin() || saving) return;
+  const v = id => document.getElementById(id).value;
+  const u1 = v('u1').trim(), a = v('n1'), u2 = v('u2').trim(), p = v('n2');
+  if (!USER_RE.test(u1)) return toast(USER_MSG);
+  if (u2 && !USER_RE.test(u2)) return toast(USER_MSG);
+  if ((a && a.length<6) || (p && p.length<6)) return toast('Passwords need at least 6 characters.');
+  saving = true; rev++; busyBtn(true);
+  const r = await api('saveUsers', { adminUser:u1, adminPass:a, partnerUser:u2, partnerPass:p });
+  saving = false;
+  if (!r.ok){ busyBtn(false); return toast(r.error || 'Could not save logins.'); }
+  user = r.user || u1; partnerUser = r.hasPartner ? (u2 || partnerUser) : ''; setWho(); closeDlg(); toast('Logins updated.');
+}
+function removePartner(){
+  if (!isAdmin()) return;
+  ask('Remove the Partner login? The partner will be logged out and cannot log in until you create it again. Your data stays.', 'Remove', async ()=>{
+    const r = await api('saveUsers', { adminUser:user, removePartner:true });
+    if (!r.ok) return toast(r.error || 'Could not remove.');
+    partnerUser = ''; toast('Partner login removed.');
+  });
+}
+
+/* ---------- deleted items (admin) ---------- */
+let delItems = [];
+function delAccName(id){
+  const a = acc(id); if (a) return a.name;
+  const it = delItems.find(x=>x.kind==='account' && x.id===id && x.data);
+  return it ? it.data.name + ' (deleted)' : 'Unknown account';
+}
+function delWhen(at){ const d = new Date(at); return isNaN(d) ? esc(at) : esc(d.toLocaleString([], {dateStyle:'medium', timeStyle:'short'})); }
+function delRow(it, i){
+  const d = it.data || {};
+  let title, sub, amt = '';
+  if (it.kind === 'account'){
+    const n = delItems.filter(x=>x.group===it.group && x.kind==='transaction').length;
+    title = '🏦 ' + esc(d.name || it.id);
+    sub = esc(d.type || '') + ' · opening ' + money(Number(d.opening)||0) + (n ? ` · ${n} transaction${n===1?'':'s'} deleted with it` : '');
+  } else {
+    title = d.type==='transfer' ? `${esc(delAccName(d.accountId))} → ${esc(delAccName(d.toId))}` : esc(d.category || 'Transaction');
+    sub = esc(d.date || '') + (d.type!=='transfer' ? ' · ' + esc(delAccName(d.accountId)) : '') + (d.note ? ' · ' + esc(d.note) : '');
+    const sign = d.type==='income' ? '+' : d.type==='expense' ? '-' : '';
+    const cls = d.type==='income' ? 'pos' : d.type==='expense' ? 'neg' : '';
+    amt = `<b class="${cls}">${sign}${money(Number(d.amount)||0)}</b>`;
+  }
+  const restored = it.status === 'restored';
+  return `<div class="tx" style="${restored?'opacity:.55':''}">
+    <div class="row"><div><div>${title}</div><div class="muted">${sub}</div></div><div style="text-align:right">${amt}</div></div>
+    <div class="row" style="margin-top:6px"><span class="muted">Deleted by ${esc(it.by||'?')} · ${delWhen(it.at)}</span>
+    ${restored ? '<span class="muted">Restored</span>' : `<button class="btn ghost" style="padding:6px 12px;font-size:14px" onclick="restoreItem(${i})">Restore</button>`}</div></div>`;
+}
+async function deletedDialog(){
+  if (!isAdmin()) return;
+  dlg.innerHTML = '<h3>Deleted items</h3><p class="muted">Loading…</p><div class="row" style="margin-top:12px"><button class="btn ghost" onclick="closeDlg()">Close</button></div>';
+  if (!dlg.open) dlg.showModal();
+  const r = await api('listDeleted');
+  if (!r.ok){
+    if (r.auth) return;
+    dlg.innerHTML = `<h3>Deleted items</h3><p class="muted">${esc(r.error || 'Could not load.')}</p><div class="row" style="margin-top:12px"><button class="btn ghost" onclick="closeDlg()">Close</button></div>`;
+    return;
+  }
+  delItems = Array.isArray(r.items) ? r.items : [];
+  if (r.deletedCount != null){ deletedCount = r.deletedCount; render(); }
+  dlg.innerHTML = `<h3>Deleted items</h3>
+    <p class="muted">Everything deleted is kept here with who deleted it and when. Restoring an account also brings back the transactions deleted with it.</p>
+    <div style="max-height:58vh;overflow:auto">${delItems.length ? delItems.map(delRow).join('') : '<div class="empty">Nothing has been deleted.</div>'}</div>
+    <div class="row" style="margin-top:12px"><button class="btn ghost" onclick="closeDlg()">Close</button></div>`;
+}
+async function restoreItem(i){
+  const it = delItems[i];
+  if (!it || saving) return;
+  saving = true; rev++;
+  const r = await api('restore', { kind:it.kind, id:it.id, group:it.group });
+  saving = false;
+  if (r.auth) return;
+  if (r.deletedCount != null) deletedCount = r.deletedCount;
+  if (!r.ok){ toast(r.error || 'Could not restore.'); return; }
+  await refresh(true);
+  toast('Restored.');
+  deletedDialog();
+}
+
+/* ---------- iPhone home-screen icon (drawn on the fly, no extra file needed) ---------- */
+(function(){
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 180;
+    const x = c.getContext('2d');
+    x.fillStyle = '#1f6feb'; x.fillRect(0,0,180,180);
+    x.font = '110px -apple-system, "Apple Color Emoji", sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('💰', 90, 98);
+    const l = document.createElement('link'); l.rel = 'apple-touch-icon'; l.href = c.toDataURL('image/png');
+    document.head.appendChild(l);
+  } catch(e){}
+})();
+
+/* ---------- start ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; render(); });
+document.getElementById('fab').onclick = txDialog;
+dlg.addEventListener('cancel', e=>{ if (saving) e.preventDefault(); });
+
+let booting = false;
+async function checkSetup(){ const st = await api('status'); if (st.ok && !st.hasAdmin) showSetup(); }
+async function boot(){
+  if (booting) return;
+  booting = true;
+  try {
+    if (token){
+      const c = readCache();
+      if (c){                                   // instant: show the saved copy, then update in the background
+        db = sanitizeDb(c.db); role = c.role; user = c.user || ''; partnerUser = c.partnerUser || ''; deletedCount = c.deletedCount || 0;
+        showApp('Syncing…');
+        refresh(false).then(()=>{ if (!token) checkSetup(); });
+        return;
+      }
+      showAuth('<p class="muted" style="text-align:center;margin:20px 0">Loading your data…</p>');
+      const r = await enter();                  // no separate "status" call needed when already logged in
+      if (r.ok) return;
+      if (r.auth){ checkSetup(); return; }      // api() already showed the login screen
+      showAuth(`<h2>Can't load data</h2><p class="muted">${esc(r.error)}</p><button class="btn" style="width:100%" onclick="boot()">Try again</button>`);
+      return;
+    }
+    showAuth('<p class="muted" style="text-align:center;margin:20px 0">Connecting to Google Sheets…</p>');
+    const st = await api('status');
+    if (!st.ok){
+      showAuth(`<h2>Can't connect</h2><p class="muted">${esc(st.error)}</p><button class="btn" style="width:100%" onclick="boot()">Try again</button>`);
+      return;
+    }
+    if (!st.hasAdmin){ showSetup(); return; }
+    showLogin();
+  } finally { booting = false; }
+}
+boot();
+</script>
+</body>
+</html>
